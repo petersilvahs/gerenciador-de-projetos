@@ -1,10 +1,11 @@
 import { Projeto } from '../types';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = 'http://127.0.0.1:3001/api';
 
 export const api = {
   getProjetos: async (): Promise<Projeto[]> => {
-    const res = await fetch(`${API_URL}/projetos`);
+    const res = await fetch(`${API_URL}/projetos?t=${Date.now()}`);
+    if (!res.ok) throw new Error('Falha ao carregar projetos');
     return res.json();
   },
   

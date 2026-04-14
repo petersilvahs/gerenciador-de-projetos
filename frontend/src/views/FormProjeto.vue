@@ -47,11 +47,17 @@ const handleFileChange = (e: Event) => {
 const formRef = ref<HTMLFormElement | null>(null);
 const wasValidated = ref(false);
 
+const isFormValid = computed(() => {
+  const nameOk = formData.value.nome && /\s*\S+\s+\S+.*/.test(formData.value.nome);
+  const clientOk = formData.value.cliente && formData.value.cliente.trim().length > 0;
+  const startOk = !!formData.value.dataInicio;
+  const endOk = !!formData.value.dataFinal;
+  return !!(nameOk && clientOk && startOk && endOk);
+});
+
 const handleSubmit = async (e: Event) => {
   wasValidated.value = true;
-  if (!formRef.value?.checkValidity()) {
-    return;
-  }
+  if (!isFormValid.value) return;
   
   if (isEditing.value) {
     await api.updateProjeto(id, formData.value);
@@ -83,8 +89,10 @@ const handleSubmit = async (e: Event) => {
           <input 
             type="text" 
             v-model="formData.nome"
+            pattern="\s*\S+\s+\S+.*"
             required 
           />
+          <span class="errorMsg">Por favor, digite ao menos duas palavras</span>
         </div>
 
         <div class="formGroup">
@@ -92,8 +100,10 @@ const handleSubmit = async (e: Event) => {
           <input 
             type="text" 
             v-model="formData.cliente"
+            pattern=".*\S.*"
             required 
           />
+          <span class="errorMsg">Por favor, digite ao menos uma palavra</span>
         </div>
 
         <div class="row">
@@ -104,6 +114,7 @@ const handleSubmit = async (e: Event) => {
               v-model="formData.dataInicio"
               required 
             />
+            <span class="errorMsg">Selecione uma data válida</span>
           </div>
           <div class="formGroup">
             <label>Data Final <span>(Obrigatório)</span></label>
@@ -113,6 +124,7 @@ const handleSubmit = async (e: Event) => {
               :min="formData.dataInicio"
               required 
             />
+            <span class="errorMsg">Selecione uma data válida</span>
           </div>
         </div>
 
@@ -138,7 +150,7 @@ const handleSubmit = async (e: Event) => {
           </div>
         </div>
 
-        <button type="submit" class="btnSubmit">
+        <button type="submit" class="btnSubmit" :disabled="!isFormValid">
           {{ isEditing ? 'Salvar alterações' : 'Salvar projeto' }}
         </button>
       </form>
@@ -215,13 +227,31 @@ const handleSubmit = async (e: Event) => {
   border-color: var(--primary);
 }
 
+.was-validated .formGroup:has(input:invalid) label {
+  color: var(--danger, #e53935);
+}
+
+.was-validated .formGroup:has(input:invalid) label span {
+  color: var(--danger, #e53935);
+}
+
 .was-validated input:invalid {
-  border-color: var(--danger, #ff4c4c);
-  background-color: rgba(255, 76, 76, 0.05);
+  border-color: var(--danger, #e53935);
+  color: var(--danger, #e53935);
 }
 
 .was-validated input:invalid:focus {
-  border-color: var(--danger, #ff4c4c);
+  border-color: var(--danger, #e53935);
+}
+
+.errorMsg {
+  display: none;
+  color: var(--danger, #e53935);
+  font-size: 14px;
+}
+
+.was-validated input:invalid ~ .errorMsg {
+  display: block;
 }
 
 .row {
@@ -294,20 +324,25 @@ const handleSubmit = async (e: Event) => {
 }
 
 .btnSubmit {
-  width: 100%;
+  display: block;
+  width: 704px;
+  max-width: 100%;
+  height: 52px;
   background-color: var(--primary);
   color: white;
-  padding: 14px;
-  border-radius: 4px;
+  margin: 16px auto 0;
+  border-radius: 26px;
   font-size: 16px;
   font-weight: 600;
-  margin-top: 16px;
   transition: background-color 0.2s;
-  opacity: 0.5;
 }
 
-.btnSubmit:hover {
+.btnSubmit:disabled {
+  background-color: var(--primary-disabled);
+  cursor: not-allowed;
+}
+
+.btnSubmit:not(:disabled):hover {
   background-color: var(--primary-hover);
-  opacity: 1;
 }
 </style>

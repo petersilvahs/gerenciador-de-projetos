@@ -95,6 +95,7 @@ const clienteHtml = computed(() => renderHighlight(props.projeto.cliente));
   transition: transform 0.2s;
   display: flex;
   flex-direction: column;
+  width: 346px;
 }
 
 .card:hover {
@@ -124,7 +125,9 @@ const clienteHtml = computed(() => renderHighlight(props.projeto.cliente));
 }
 
 .coverSymbol {
-  height: 60px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   opacity: 0.8;
 }
 
@@ -233,7 +236,6 @@ const clienteHtml = computed(() => renderHighlight(props.projeto.cliente));
 .client {
   font-size: 14px;
   color: var(--text-light);
-  margin-bottom: 16px;
 }
 
 .client strong {
@@ -241,7 +243,7 @@ const clienteHtml = computed(() => renderHighlight(props.projeto.cliente));
 }
 
 .dates {
-  margin-top: auto;
+  margin-top: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;

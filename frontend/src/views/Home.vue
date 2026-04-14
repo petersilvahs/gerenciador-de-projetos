@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { Plus, Trash } from 'lucide-vue-next';
+import { Trash } from 'lucide-vue-next';
 import { Projeto } from '../types';
 import { api } from '../services/api';
 import ProjectCard from '../components/ProjectCard.vue';
@@ -16,14 +16,18 @@ const projetos = ref<Projeto[]>([]);
 const apenasFavoritos = ref(false);
 const sortOption = ref<SortOption>('alfa');
 const loading = ref(true);
+const error = ref<string | null>(null);
 const deleteId = ref<string | null>(null);
 
 const fetchProjetos = async () => {
+  loading.value = true;
+  error.value = null;
   try {
     const data = await api.getProjetos();
     projetos.value = data;
-  } catch (e) {
+  } catch (e: any) {
     console.error(e);
+    error.value = e.message || 'Erro ao carregar projetos. Verifique se a API está rodando.';
   } finally {
     loading.value = false;
   }
@@ -86,12 +90,20 @@ const filteredAndSorted = computed(() => {
 <template>
   <div v-if="loading">Carregando...</div>
   
+  <div v-else-if="error" class="errorState">
+    <div class="emptyContent">
+      <h2 style="color: var(--danger)">Ops! Algo deu errado</h2>
+      <p>{{ error }}</p>
+      <button @click="fetchProjetos" class="btnSecondary">Tentar novamente</button>
+    </div>
+  </div>
+
   <div v-else-if="projetos.length === 0 && !searchQ" class="emptyState">
     <div class="emptyContent">
       <h2>Nenhum projeto</h2>
       <p>Clique no botão abaixo para criar o primeiro e gerenciá-lo.</p>
       <router-link to="/projeto/novo" class="btnPrimary">
-        <Plus :size="18" />
+        <img src="/assets/plus-circle.svg" alt="Novo projeto" style="width: 18px; height: 18px;" />
         Novo projeto
       </router-link>
     </div>
@@ -117,7 +129,7 @@ const filteredAndSorted = computed(() => {
         </select>
 
         <router-link to="/projeto/novo" class="btnPrimary">
-          <Plus :size="18" /> Novo projeto
+          <img src="/assets/plus-circle.svg" alt="Novo projeto" style="width: 18px; height: 18px;" /> Novo projeto
         </router-link>
       </div>
     </div>
@@ -287,9 +299,10 @@ const filteredAndSorted = computed(() => {
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(346px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 24px;
+  justify-content: flex-start;
 }
 
 .deleteModalContainer {
