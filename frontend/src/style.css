@@ -1,0 +1,46 @@
+:root {
+  --bg-dark: #1e1b4b;
+  --bg-light: #f8f8fb;
+  --primary: #635bff;
+  --primary-hover: #524ade;
+  --text-dark: #1e1e24;
+  --text-light: #8e8e9c;
+  --white: #ffffff;
+  --border: #e2e2ea;
+  --danger: #ef4444;
+  --warn: #fbbf24;
+  
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light;
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}
