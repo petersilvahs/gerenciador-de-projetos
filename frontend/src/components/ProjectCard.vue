@@ -95,7 +95,7 @@ const clienteHtml = computed(() => renderHighlight(props.projeto.cliente));
   transition: transform 0.2s;
   display: flex;
   flex-direction: column;
-  width: 346px;
+  width: 250px;
 }
 
 .card:hover {
@@ -170,27 +170,27 @@ const clienteHtml = computed(() => renderHighlight(props.projeto.cliente));
 .dropdown {
   position: absolute;
   right: 0;
-  bottom: calc(100% + 8px);
+  top: calc(100% + 8px);
   background: var(--white);
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   display: none;
   flex-direction: column;
-  min-width: 200px;
+  width: 240px;
+  height: 106px;
   padding: 8px 0;
   z-index: 10;
 }
 
 .dropdownPointer {
   position: absolute;
-  bottom: -6px;
+  top: -6px;
   right: 12px;
   width: 14px;
   height: 14px;
   background: white;
   transform: rotate(45deg);
   z-index: -1;
-  border-bottom-right-radius: 2px;
 }
 
 .menuWrapper:hover .dropdown,

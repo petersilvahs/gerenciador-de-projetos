@@ -32,13 +32,37 @@ onMounted(async () => {
   }
 });
 
+const compressImage = (base64Str: string, maxWidth = 800): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = base64Str;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', 0.7));
+    };
+  });
+};
+
 const handleFileChange = (e: Event) => {
   const target = e.target as HTMLInputElement;
   const file = target.files?.[0];
   if (file) {
     const reader = new FileReader();
-    reader.onloadend = () => {
-      formData.value.capaUrl = reader.result as string;
+    reader.onloadend = async () => {
+      const compressed = await compressImage(reader.result as string);
+      formData.value.capaUrl = compressed;
     };
     reader.readAsDataURL(file);
   }
