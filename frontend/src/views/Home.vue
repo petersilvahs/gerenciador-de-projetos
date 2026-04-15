@@ -466,7 +466,7 @@ const filteredAndSorted = computed(() => {
   transition: 0.2s;
   background: white;
   color: var(--primary);
-  border: 1px solid #8C8B93;
+  border: 1px solid #635bff;
 }
 .btnCancel:hover {
   background: rgba(99,91,255,0.05);

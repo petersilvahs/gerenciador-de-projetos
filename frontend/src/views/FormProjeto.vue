@@ -70,9 +70,19 @@ const handleFileChange = (e: Event) => {
 
 const formRef = ref<HTMLFormElement | null>(null);
 const wasValidated = ref(false);
+const touched = ref<Record<string, boolean>>({
+  nome: false,
+  cliente: false,
+  dataInicio: false,
+  dataFinal: false,
+});
+
+const onBlur = (field: string) => {
+  touched.value[field] = true;
+};
 
 const isFormValid = computed(() => {
-  const nameOk = formData.value.nome && formData.value.nome.trim().length > 0;
+  const nameOk = formData.value.nome && formData.value.nome.trim().split(/\s+/).length >= 2;
   const clientOk = formData.value.cliente && formData.value.cliente.trim().length > 0;
   const startOk = !!formData.value.dataInicio;
   const endOk = !!formData.value.dataFinal;
@@ -115,9 +125,11 @@ const handleSubmit = async (e: Event) => {
           <input 
             type="text" 
             v-model="formData.nome"
-            required 
+            required
+            @blur="onBlur('nome')"
+            :class="{ 'input-touched-invalid': touched.nome && (formData.nome?.trim().split(/\s+/).length ?? 0) < 2 }"
           />
-          <span class="errorMsg">Por favor, digite o nome do projeto</span>
+          <span class="errorMsg" :class="{ 'show': touched.nome && (formData.nome?.trim().split(/\s+/).length ?? 0) < 2 }">Por favor, digite ao menos duas palavras</span>
         </div>
 
         <div class="formGroup">
@@ -125,10 +137,11 @@ const handleSubmit = async (e: Event) => {
           <input 
             type="text" 
             v-model="formData.cliente"
-            pattern=".*\S.*"
-            required 
+            required
+            @blur="onBlur('cliente')"
+            :class="{ 'input-touched-invalid': touched.cliente && !formData.cliente?.trim() }"
           />
-          <span class="errorMsg">Por favor, digite ao menos uma palavra</span>
+          <span class="errorMsg" :class="{ 'show': touched.cliente && !formData.cliente?.trim() }">Por favor, digite ao menos uma palavra</span>
         </div>
 
         <div class="row">
@@ -137,9 +150,11 @@ const handleSubmit = async (e: Event) => {
             <input 
               type="date" 
               v-model="formData.dataInicio"
-              required 
+              required
+              @blur="onBlur('dataInicio')"
+              :class="{ 'input-touched-invalid': touched.dataInicio && !formData.dataInicio }"
             />
-            <span class="errorMsg">Selecione uma data válida</span>
+            <span class="errorMsg" :class="{ 'show': touched.dataInicio && !formData.dataInicio }">Selecione uma data válida</span>
           </div>
           <div class="formGroup">
             <label>Data Final <span>(Obrigatório)</span></label>
@@ -147,9 +162,11 @@ const handleSubmit = async (e: Event) => {
               type="date" 
               v-model="formData.dataFinal"
               :min="formData.dataInicio"
-              required 
+              required
+              @blur="onBlur('dataFinal')"
+              :class="{ 'input-touched-invalid': touched.dataFinal && !formData.dataFinal }"
             />
-            <span class="errorMsg">Selecione uma data válida</span>
+            <span class="errorMsg" :class="{ 'show': touched.dataFinal && !formData.dataFinal }">Selecione uma data válida</span>
           </div>
         </div>
 
@@ -282,8 +299,30 @@ const handleSubmit = async (e: Event) => {
   font-size: 14px;
 }
 
+.errorMsg.show {
+  display: block;
+}
+
 .was-validated input:invalid ~ .errorMsg {
   display: block;
+}
+
+.input-touched-invalid {
+  border-color: var(--danger, #e53935) !important;
+  color: var(--danger, #e53935);
+}
+
+.input-touched-invalid:focus {
+  border-color: var(--danger, #e53935) !important;
+  box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.15) !important;
+}
+
+.formGroup:has(.input-touched-invalid) label {
+  color: var(--danger, #e53935);
+}
+
+.formGroup:has(.input-touched-invalid) label span {
+  color: var(--danger, #e53935);
 }
 
 .row {
