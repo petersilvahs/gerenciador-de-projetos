@@ -124,7 +124,7 @@ const filteredAndSorted = computed(() => {
   <div v-else class="projectsLayout">
     <div class="header">
       <div class="titleArea">
-        <h1>Projetos <span>({{ filteredAndSorted.length }})</span></h1>
+          <h1>Projetos <span>({{ filteredAndSorted.length }})</span></h1>
       </div>
       
       <div class="controls">
@@ -140,9 +140,9 @@ const filteredAndSorted = computed(() => {
           <option value="prazo">Prazo mais próximo</option>
         </select>
 
-        <router-link to="/projeto/novo" class="btnPrimary">
-          <img src="/assets/plus-circle.svg" alt="Novo projeto" style="width: 18px; height: 18px;" /> Novo projeto
-        </router-link>
+          <router-link to="/projeto/novo" class="btnPrimary">
+            <img src="/assets/plus-circle.svg" alt="Novo projeto" style="width: 18px; height: 18px;" /> Novo projeto
+          </router-link>
       </div>
     </div>
 
@@ -495,15 +495,43 @@ const filteredAndSorted = computed(() => {
   }
 
   .controls {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 16px;
     width: 100%;
   }
 
   .controls .btnPrimary {
-    grid-column: 1 / -1;
-    justify-self: center;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+  }
+
+  .grid {
+    justify-content: center;
+  }
+
+  .deleteModalContainer {
+    padding: 20px 16px 24px;
+    min-height: auto;
+  }
+
+  .deleteModalProjectName {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .deleteModalActions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .btnCancel,
+  .btnConfirm {
+    width: 100%;
+    max-width: 100%;
   }
 }
 </style>
