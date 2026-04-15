@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ArrowLeft, Upload } from 'lucide-vue-next';
+import { ArrowLeft, Upload, AlertTriangle } from 'lucide-vue-next';
 import { api } from '../services/api';
 import { Projeto } from '../types';
+import Modal from '../components/Modal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -20,6 +21,9 @@ const formData = ref<Partial<Projeto>>({
 });
 
 const loading = ref(isEditing.value);
+const isDirty = ref(false);
+const showLeaveModal = ref(false);
+const saved = ref(false);
 
 onMounted(async () => {
   if (isEditing.value) {
@@ -81,6 +85,23 @@ const onBlur = (field: string) => {
   touched.value[field] = true;
 };
 
+watch(formData, () => {
+  if (!loading.value) isDirty.value = true;
+}, { deep: true });
+
+const handleBack = () => {
+  if (isDirty.value && !saved.value) {
+    showLeaveModal.value = true;
+  } else {
+    router.push('/');
+  }
+};
+
+const confirmLeave = () => {
+  showLeaveModal.value = false;
+  router.push('/');
+};
+
 const isFormValid = computed(() => {
   const nameOk = formData.value.nome && formData.value.nome.trim().split(/\s+/).length >= 2;
   const clientOk = formData.value.cliente && formData.value.cliente.trim().length > 0;
@@ -98,6 +119,7 @@ const handleSubmit = async (e: Event) => {
   } else {
     await api.createProjeto(formData.value);
   }
+  saved.value = true;
   await new Promise(resolve => setTimeout(resolve, 800));
   router.push('/');
 };
@@ -107,9 +129,9 @@ const handleSubmit = async (e: Event) => {
   <div v-if="loading">Carregando...</div>
   <div v-else class="wrapper">
     <div class="pageHeader">
-      <router-link to="/" class="backBtn">
+      <a class="backBtn" @click.prevent="handleBack" href="#">
         <ArrowLeft :size="16" /> Voltar
-      </router-link>
+      </a>
       <h1 class="pageTitle">{{ isEditing ? 'Editar projeto' : 'Novo projeto' }}</h1>
     </div>
 
@@ -197,6 +219,25 @@ const handleSubmit = async (e: Event) => {
         </button>
       </form>
     </div>
+
+    <Modal
+      :isOpen="showLeaveModal"
+      @close="showLeaveModal = false"
+      hideHeader
+    >
+      <div class="leaveModalContainer">
+        <div class="leaveModalIcon">
+          <AlertTriangle color="white" :size="20" />
+        </div>
+        <h2 class="leaveModalTitle">Deseja sair sem salvar?</h2>
+        <hr class="leaveModalDivider" />
+        <p class="leaveModalText">As alterações feitas não foram salvas e serão perdidas.</p>
+        <div class="leaveModalActions">
+          <button class="btnCancel" @click="showLeaveModal = false">Voltar</button>
+          <button class="btnConfirm" @click="confirmLeave">Sair sem salvar</button>
+        </div>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -421,6 +462,119 @@ const handleSubmit = async (e: Event) => {
   .row {
     flex-direction: column;
     gap: 16px;
+  }
+}
+
+.leaveModalContainer {
+  position: relative;
+  text-align: center;
+  padding: 24px 32px 32px;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.leaveModalIcon {
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 48px;
+  background-color: #695CCD;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.leaveModalTitle {
+  font-size: 22px;
+  color: #1F1283;
+  font-weight: 600;
+  line-height: 32px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.leaveModalDivider {
+  border: 0;
+  border-top: 1px solid #8C8B93;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.leaveModalText {
+  color: var(--text-light);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.leaveModalActions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.btnCancel {
+  width: 230px;
+  height: 50px;
+  border-radius: 26px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  background: white;
+  color: var(--primary);
+  border: 1px solid #635bff;
+;
+}
+
+.btnCancel:hover {
+  background: rgba(99,91,255,0.05);
+}
+
+.btnConfirm {
+  width: 230px;
+  height: 50px;
+  border-radius: 26px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  background: #695CCD;
+  color: white;
+  border: 1px solid #695CCD;
+}
+
+.btnConfirm:hover {
+  background: #524ade;
+}
+
+@media (max-width: 768px) {
+  .leaveModalContainer {
+    padding: 20px 16px 24px;
+    min-height: auto;
+  }
+
+  .leaveModalActions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .btnCancel,
+  .btnConfirm {
+    width: 100%;
+    max-width: 100%;
   }
 }
 </style>
