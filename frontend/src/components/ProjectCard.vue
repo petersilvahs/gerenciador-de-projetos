@@ -203,7 +203,7 @@ const clienteHtml = computed(() => renderHighlight(props.projeto.cliente));
   gap: 12px;
   text-align: left;
   font-size: 16px;
-  color: var(--primary);
+  color: #695CCD;
   transition: background 0.2s;
 }
 

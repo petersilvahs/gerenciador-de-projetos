@@ -312,7 +312,7 @@ const filteredAndSorted = computed(() => {
 
 .titleArea h1 {
   font-size: 24px;
-  color: var(--primary);
+  color: #1F1283;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -321,7 +321,7 @@ const filteredAndSorted = computed(() => {
 
 .titleArea span {
   font-size: 14px;
-  color: var(--primary);
+  color: #1F1283;
   font-weight: 500;
 }
 
@@ -399,7 +399,6 @@ const filteredAndSorted = computed(() => {
   position: relative;
   text-align: center;
   padding: 24px 32px 32px;
-  min-height: 321px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -407,7 +406,7 @@ const filteredAndSorted = computed(() => {
 }
 .deleteModalIcon {
   position: absolute;
-  top: -44px;
+  top: -35px;
   left: 50%;
   transform: translateX(-50%);
   width: 48px;
@@ -421,7 +420,7 @@ const filteredAndSorted = computed(() => {
 }
 .deleteModalTitle {
   font-size: 22px;
-  color: var(--primary);
+  color: #1F1283;
   font-weight: 600;
   line-height: 32px;
   margin-top: 16px;
@@ -457,8 +456,8 @@ const filteredAndSorted = computed(() => {
   margin-top: 8px;
 }
 .btnCancel {
-  width: 226px;
-  height: 52px;
+  width: 230px;
+  height: 50px;
   border-radius: 26px;
   font-weight: 500;
   font-size: 14px;
@@ -472,8 +471,8 @@ const filteredAndSorted = computed(() => {
   background: rgba(99,91,255,0.05);
 }
 .btnConfirm {
-  width: 260px;
-  height: 52px;
+  width: 230px;
+  height: 50px;
   border-radius: 26px;
   font-weight: 500;
   font-size: 14px;

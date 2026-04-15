@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { Search, X } from 'lucide-vue-next';
 
@@ -11,8 +11,15 @@ const query = ref('');
 const recentSearches = ref<string[]>([]);
 const showDropdown = ref(false);
 const inputRef = ref<HTMLInputElement | null>(null);
+const wrapperRef = ref<HTMLElement | null>(null);
 
 const router = useRouter();
+
+const handleClickOutside = (e: MouseEvent) => {
+  if (wrapperRef.value && !wrapperRef.value.contains(e.target as Node)) {
+    emit('close');
+  }
+};
 
 onMounted(() => {
   inputRef.value?.focus();
@@ -21,6 +28,12 @@ onMounted(() => {
     recentSearches.value = JSON.parse(stored);
   }
   showDropdown.value = true;
+  document.addEventListener('mousedown', handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', handleClickOutside);
+  router.replace('/');
 });
 
 watch(query, (newVal) => {
@@ -38,6 +51,11 @@ const handleSearch = (searchTerm: string) => {
   router.push(`/?q=${encodeURIComponent(searchTerm)}`);
 };
 
+const removeRecent = (index: number) => {
+  recentSearches.value.splice(index, 1);
+  localStorage.setItem('@Gerenciador:recentSearches', JSON.stringify(recentSearches.value));
+};
+
 const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === 'Enter') {
     handleSearch(query.value);
@@ -48,13 +66,13 @@ const handleKeyDown = (e: KeyboardEvent) => {
 </script>
 
 <template>
-  <div class="wrapper">
+  <div class="wrapper" ref="wrapperRef">
     <div class="searchContainer">
       <Search class="icon" color="#8e8e9c" :size="20" />
       <input
         ref="inputRef"
         type="text"
-        placeholder="Buscar projetos"
+        placeholder="Digite o nome do projeto..."
         v-model="query"
         @input="showDropdown = true"
         @keydown="handleKeyDown"
@@ -69,8 +87,13 @@ const handleKeyDown = (e: KeyboardEvent) => {
       <div class="dropdownTitle">Buscas recentes</div>
       <ul>
         <li v-for="(term, index) in recentSearches" :key="index" class="dropdownItem" @click="() => { query = term; handleSearch(term); }">
-          <Search :size="14" />
-          <span>{{ term }}</span>
+          <div class="dropdownItemLeft">
+            <img src="/assets/Icon.svg" alt="" class="historyIcon" />
+            <span>{{ term }}</span>
+          </div>
+          <button class="removeBtn" @click.stop="removeRecent(index)">
+            <X :size="14" color="var(--text-light)" />
+          </button>
         </li>
       </ul>
     </div>
@@ -110,8 +133,22 @@ const handleKeyDown = (e: KeyboardEvent) => {
   text-transform: uppercase; font-weight: 600;
 }
 .dropdownItem {
-  padding: 8px 16px; display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; display: flex; align-items: center; justify-content: space-between;
   cursor: pointer; color: var(--text-dark); font-size: 14px;
 }
 .dropdownItem:hover { background-color: var(--bg-light); }
+.dropdownItemLeft {
+  display: flex; align-items: center; gap: 8px;
+}
+.historyIcon {
+  width: 16px; height: 16px;
+}
+.removeBtn {
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: none; border-radius: 50%; padding: 4px;
+  cursor: pointer; transition: background 0.2s;
+}
+.removeBtn:hover {
+  background: rgba(0,0,0,0.08);
+}
 </style>

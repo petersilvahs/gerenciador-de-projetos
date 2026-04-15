@@ -46,7 +46,6 @@ const emit = defineEmits<{
 .modal {
   background: var(--white);
   border-radius: 8px;
-  width: 582px;
   max-width: calc(100vw - 32px);
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   animation: slideUp 0.3s ease;
@@ -80,9 +79,5 @@ const emit = defineEmits<{
 
 .closeBtn:hover {
   background: var(--bg-light);
-}
-
-.content {
-  padding: 20px;
 }
 </style>
