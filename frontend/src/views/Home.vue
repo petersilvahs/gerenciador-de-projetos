@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { Trash } from 'lucide-vue-next';
 import { Projeto } from '../types';
 import { api } from '../services/api';
+import { hasProjects } from '../composables/useAppState';
 import ProjectCard from '../components/ProjectCard.vue';
 import Modal from '../components/Modal.vue';
 
@@ -30,6 +31,7 @@ const fetchProjetos = async () => {
     error.value = e.message || 'Erro ao carregar projetos. Verifique se a API está rodando.';
   } finally {
     loading.value = false;
+    hasProjects.value = projetos.value.length > 0;
   }
 };
 
@@ -88,28 +90,38 @@ const filteredAndSorted = computed(() => {
 </script>
 
 <template>
-  <div v-if="loading">Carregando...</div>
-  
-  <div v-else-if="error" class="errorState">
-    <div class="emptyContent">
-      <h2 style="color: var(--danger)">Ops! Algo deu errado</h2>
-      <p>{{ error }}</p>
-      <button @click="fetchProjetos" class="btnSecondary">Tentar novamente</button>
+  <!-- Estado com painel branco centralizado (sem projetos) -->
+  <div v-if="loading || error || (projetos.length === 0 && !searchQ)" class="pageWrapper">
+    <div class="contentPanel">
+
+      <div v-if="loading" class="loadingState">
+        <div class="spinner"></div>
+      </div>
+
+      <div v-else-if="error" class="errorState">
+        <div class="emptyContent">
+          <h2 style="color: var(--danger)">Ops! Algo deu errado</h2>
+          <p>{{ error }}</p>
+          <button @click="fetchProjetos" class="btnSecondary">Tentar novamente</button>
+        </div>
+      </div>
+
+      <div v-else class="emptyState">
+        <div class="emptyContent">
+          <h2>Nenhum projeto</h2>
+          <p>Clique no botão abaixo para criar o primeiro e gerenciá-lo.</p>
+          <router-link to="/projeto/novo" class="btnPrimary">
+            <img src="/assets/plus-circle.svg" alt="Novo projeto" style="width: 18px; height: 18px;" />
+            Novo projeto
+          </router-link>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <div v-else-if="projetos.length === 0 && !searchQ" class="emptyState">
-    <div class="emptyContent">
-      <h2>Nenhum projeto</h2>
-      <p>Clique no botão abaixo para criar o primeiro e gerenciá-lo.</p>
-      <router-link to="/projeto/novo" class="btnPrimary">
-        <img src="/assets/plus-circle.svg" alt="Novo projeto" style="width: 18px; height: 18px;" />
-        Novo projeto
-      </router-link>
-    </div>
-  </div>
-
-  <div v-else>
+  <!-- Estado com projetos: layout tela cheia sem wrapper -->
+  <div v-else class="projectsLayout">
     <div class="header">
       <div class="titleArea">
         <h1>Projetos <span>({{ filteredAndSorted.length }})</span></h1>
@@ -134,7 +146,13 @@ const filteredAndSorted = computed(() => {
       </div>
     </div>
 
-    <div class="grid">
+    <!-- Estado vazio de favoritos -->
+    <div v-if="filteredAndSorted.length === 0 && apenasFavoritos" class="noFavoritesState">
+      <p class="noFavoritesTitle">Nenhum projeto encontrado</p>
+      <p class="noFavoritesSubtitle">Favorite seu projetos mais importantes</p>
+    </div>
+
+    <div v-else class="grid">
       <ProjectCard 
         v-for="projeto in filteredAndSorted" 
         :key="projeto.id" 
@@ -144,8 +162,7 @@ const filteredAndSorted = computed(() => {
         @edit="(id) => $router.push(`/projeto/${id}/editar`)"
         @delete="id => deleteId = id"
       />
-      
-      <div v-if="filteredAndSorted.length === 0 && searchQ" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-light);">
+      <div v-if="filteredAndSorted.length === 0 && searchQ" style="text-align: center; padding: 40px; color: var(--text-light); width: 100%;">
         Nenhum projeto encontrado para a busca "{{ searchQ }}".
       </div>
     </div>
@@ -173,11 +190,78 @@ const filteredAndSorted = computed(() => {
 </template>
 
 <style scoped>
-.emptyState {
+.pageWrapper {
+  height: calc(100vh - 80px);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.contentPanel {
+  background: #ffffff;
+  border-radius: 4px;
+  width: 100%;
+  height: 650px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.projectsLayout {
+  padding: 32px 40px;
+}
+
+.noFavoritesState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: 8px;
+  text-align: center;
+}
+
+.noFavoritesTitle {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1F1283;
+  line-height: 100%;
+}
+
+.noFavoritesSubtitle {
+  font-size: 16px;
+  font-weight: 400;
+  color: #717171;
+  line-height: 22px;
+}
+
+.loadingState {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  flex: 1;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(105, 92, 205, 0.2);
+  border-top-color: var(--bg-dark);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .emptyContent {
@@ -186,23 +270,29 @@ const filteredAndSorted = computed(() => {
 
 .emptyContent h2 {
   font-size: 24px;
-  color: var(--primary);
+  color: #1F1283;
   margin-bottom: 12px;
-  font-weight: 700;
+  font-weight: 600;
+  line-height: 100%;
 }
 
 .emptyContent p {
-  color: var(--text-light);
+  color: #717171;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
   margin-bottom: 24px;
 }
 
 .btnPrimary {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  background-color: var(--primary);
+  background-color: #695CCD;
   color: white;
-  padding: 10px 20px;
+  width: 184px;
+  height: 40px;
   border-radius: 20px;
   font-weight: 500;
   font-size: 14px;
@@ -274,7 +364,7 @@ const filteredAndSorted = computed(() => {
 }
 
 .toggle input:checked + .slider {
-  background-color: var(--text-dark);
+  background-color: #FFB23D;
 }
 
 .toggle input:checked + .slider::before {
@@ -308,7 +398,12 @@ const filteredAndSorted = computed(() => {
 .deleteModalContainer {
   position: relative;
   text-align: center;
-  padding: 16px 24px;
+  padding: 24px 32px 32px;
+  min-height: 321px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .deleteModalIcon {
   position: absolute;
@@ -317,7 +412,7 @@ const filteredAndSorted = computed(() => {
   transform: translateX(-50%);
   width: 48px;
   height: 48px;
-  background-color: var(--primary);
+  background-color: #695CCD;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -325,55 +420,90 @@ const filteredAndSorted = computed(() => {
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 .deleteModalTitle {
-  font-size: 18px;
+  font-size: 22px;
   color: var(--primary);
-  font-weight: 700;
+  font-weight: 600;
+  line-height: 32px;
   margin-top: 16px;
   margin-bottom: 16px;
+  text-align: center;
 }
 .deleteModalDivider {
   border: 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid #8C8B93;
   margin-bottom: 16px;
+  width: 100%;
 }
 .deleteModalText {
   color: var(--text-light);
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
   margin-bottom: 4px;
+  text-align: center;
 }
 .deleteModalProjectName {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-dark);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 32px;
+  color: #1C1930;
   margin-bottom: 24px;
+  text-align: center;
 }
 .deleteModalActions {
   display: flex;
   gap: 16px;
+  align-items: center;
+  margin-top: 8px;
 }
-.btnCancel, .btnConfirm {
-  flex: 1;
-  padding: 10px 0;
-  border-radius: 20px;
+.btnCancel {
+  width: 226px;
+  height: 52px;
+  border-radius: 26px;
   font-weight: 500;
   font-size: 14px;
   cursor: pointer;
   transition: 0.2s;
-}
-.btnCancel {
   background: white;
   color: var(--primary);
-  border: 1px solid var(--primary);
+  border: 1px solid #8C8B93;
 }
 .btnCancel:hover {
   background: rgba(99,91,255,0.05);
 }
 .btnConfirm {
-  background: var(--primary);
+  width: 260px;
+  height: 52px;
+  border-radius: 26px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  background: #695CCD;
   color: white;
-  border: 1px solid var(--primary);
+  border: 1px solid #695CCD;
 }
 .btnConfirm:hover {
-  background: var(--primary-hover);
+  background: #524ade;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .controls .btnPrimary {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
 }
 </style>

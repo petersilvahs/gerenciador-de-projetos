@@ -176,7 +176,7 @@ const clienteHtml = computed(() => renderHighlight(props.projeto.cliente));
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   display: none;
   flex-direction: column;
-  width: 240px;
+  width: 200px;
   height: 106px;
   padding: 8px 0;
   z-index: 10;
@@ -227,19 +227,21 @@ const clienteHtml = computed(() => renderHighlight(props.projeto.cliente));
 }
 
 .title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
-  color: var(--primary);
+  color: #1F1283;
+  line-height: 100%;
   margin-bottom: 4px;
 }
 
 .client {
-  font-size: 14px;
-  color: var(--text-light);
+  font-size: 16px;
+  color: #717171;
+  line-height: 100%;
 }
 
 .client strong {
-  color: var(--text-dark);
+  font-weight: 700;
 }
 
 .dates {
@@ -255,8 +257,9 @@ const clienteHtml = computed(() => renderHighlight(props.projeto.cliente));
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
-  color: var(--text-light);
+  font-size: 16px;
+  color: #717171;
+  line-height: 100%;
 }
 
 :deep(.highlight) {

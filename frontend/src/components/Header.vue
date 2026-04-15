@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { Search } from 'lucide-vue-next';
 import SearchBar from './SearchBar.vue';
+import { hasProjects } from '../composables/useAppState';
 
 const isSearchOpen = ref(false);
 </script>
@@ -17,10 +18,12 @@ const isSearchOpen = ref(false);
       </router-link>
 
       <div class="actions">
-        <SearchBar v-if="isSearchOpen" @close="isSearchOpen = false" />
-        <button v-else class="searchBtn" @click="isSearchOpen = true">
-          <Search color="white" :size="20" />
-        </button>
+        <template v-if="hasProjects">
+          <SearchBar v-if="isSearchOpen" @close="isSearchOpen = false" />
+          <button v-else class="searchBtn" @click="isSearchOpen = true">
+            <Search color="white" :size="20" />
+          </button>
+        </template>
       </div>
     </div>
   </header>
@@ -29,7 +32,7 @@ const isSearchOpen = ref(false);
 <style scoped>
 .header {
   background-color: var(--bg-dark);
-  height: 64px;
+  height: 80px;
 }
 
 .container {
@@ -47,14 +50,16 @@ const isSearchOpen = ref(false);
   align-items: center;
   justify-content: center;
   gap: 12px;
+  width: 193px;
+  height: 72px;
 }
 
 .symbol {
-  height: 28px;
+  height: 48px;
 }
 
 .logoText {
-  height: 16px;
+  height: 32px;
 }
 
 .actions {

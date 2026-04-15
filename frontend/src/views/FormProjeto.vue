@@ -72,7 +72,7 @@ const formRef = ref<HTMLFormElement | null>(null);
 const wasValidated = ref(false);
 
 const isFormValid = computed(() => {
-  const nameOk = formData.value.nome && /\s*\S+\s+\S+.*/.test(formData.value.nome);
+  const nameOk = formData.value.nome && formData.value.nome.trim().length > 0;
   const clientOk = formData.value.cliente && formData.value.cliente.trim().length > 0;
   const startOk = !!formData.value.dataInicio;
   const endOk = !!formData.value.dataFinal;
@@ -88,6 +88,7 @@ const handleSubmit = async (e: Event) => {
   } else {
     await api.createProjeto(formData.value);
   }
+  await new Promise(resolve => setTimeout(resolve, 800));
   router.push('/');
 };
 </script>
@@ -95,11 +96,12 @@ const handleSubmit = async (e: Event) => {
 <template>
   <div v-if="loading">Carregando...</div>
   <div v-else class="wrapper">
-    <router-link to="/" class="backBtn">
-      <ArrowLeft :size="16" /> Voltar
-    </router-link>
-    
-    <h1 class="pageTitle">{{ isEditing ? 'Editar projeto' : 'Novo projeto' }}</h1>
+    <div class="pageHeader">
+      <router-link to="/" class="backBtn">
+        <ArrowLeft :size="16" /> Voltar
+      </router-link>
+      <h1 class="pageTitle">{{ isEditing ? 'Editar projeto' : 'Novo projeto' }}</h1>
+    </div>
 
     <div class="formCard">
       <form 
@@ -113,10 +115,9 @@ const handleSubmit = async (e: Event) => {
           <input 
             type="text" 
             v-model="formData.nome"
-            pattern="\s*\S+\s+\S+.*"
             required 
           />
-          <span class="errorMsg">Por favor, digite ao menos duas palavras</span>
+          <span class="errorMsg">Por favor, digite o nome do projeto</span>
         </div>
 
         <div class="formGroup">
@@ -184,18 +185,25 @@ const handleSubmit = async (e: Event) => {
 
 <style scoped>
 .wrapper {
-  max-width: 800px;
-  margin: 0 auto;
+  padding: 32px 40px;
+}
+
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 24px;
 }
 
 .backBtn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  color: var(--primary);
+  gap: 6px;
+  color: #695CCD;
   font-size: 14px;
   font-weight: 500;
-  margin-bottom: 16px;
+  white-space: nowrap;
 }
 
 .backBtn:hover {
@@ -204,16 +212,16 @@ const handleSubmit = async (e: Event) => {
 
 .pageTitle {
   font-size: 24px;
-  color: var(--primary);
+  color: #1F1283;
   font-weight: 700;
-  margin-bottom: 24px;
+  margin: 0;
 }
 
 .formCard {
-  background: var(--white);
+  background: transparent;
   border-radius: 8px;
   padding: 32px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid #DCDCDC;
 }
 
 .formGroup {
@@ -225,8 +233,7 @@ const handleSubmit = async (e: Event) => {
 
 .formGroup label {
   font-size: 14px;
-  font-weight: 600;
-  color: var(--primary);
+  color: #695CCD;
 }
 
 .formGroup label span {
@@ -238,7 +245,7 @@ const handleSubmit = async (e: Event) => {
 .formGroup input[type="text"],
 .formGroup input[type="date"] {
   padding: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid #695CCD;
   border-radius: 4px;
   font-family: inherit;
   font-size: 14px;
@@ -248,7 +255,8 @@ const handleSubmit = async (e: Event) => {
 }
 
 .formGroup input:focus {
-  border-color: var(--primary);
+  border-color: #695CCD;
+  box-shadow: 0 0 0 3px rgba(105, 92, 205, 0.15);
 }
 
 .was-validated .formGroup:has(input:invalid) label {
@@ -352,7 +360,7 @@ const handleSubmit = async (e: Event) => {
   width: 704px;
   max-width: 100%;
   height: 52px;
-  background-color: var(--primary);
+  background-color: #695CCD;
   color: white;
   margin: 16px auto 0;
   border-radius: 26px;
@@ -362,11 +370,18 @@ const handleSubmit = async (e: Event) => {
 }
 
 .btnSubmit:disabled {
-  background-color: var(--primary-disabled);
+  background-color: #B2A8FF;
   cursor: not-allowed;
 }
 
 .btnSubmit:not(:disabled):hover {
   background-color: var(--primary-hover);
+}
+
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+    gap: 16px;
+  }
 }
 </style>

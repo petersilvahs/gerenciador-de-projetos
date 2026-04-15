@@ -46,8 +46,8 @@ const emit = defineEmits<{
 .modal {
   background: var(--white);
   border-radius: 8px;
-  width: 100%;
-  max-width: 400px;
+  width: 582px;
+  max-width: 582px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   animation: slideUp 0.3s ease;
 }
